@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LocationAutocomplete } from './LocationAutocomplete';
@@ -34,6 +34,20 @@ const mockSuggestions: GeocodeResult[] = [
   },
 ];
 
+const mockGoteborg: GeocodeResult = {
+  placeId: 100,
+  name: 'Göteborg',
+  displayName: 'Göteborg, Västra Götalands län, Sverige',
+  coordinates: { lat: 57.7089, lon: 11.9746 },
+};
+
+const mockMalmo: GeocodeResult = {
+  placeId: 101,
+  name: 'Malmö',
+  displayName: 'Malmö, Skåne län, Sverige',
+  coordinates: { lat: 55.6050, lon: 13.0038 },
+};
+
 describe('LocationAutocomplete', () => {
   const defaultProps = {
     label: 'Location',
@@ -44,6 +58,12 @@ describe('LocationAutocomplete', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSearchLocations.mockResolvedValue(mockSuggestions);
+    // Clear localStorage before each test
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it('renders with label and placeholder', () => {
@@ -97,8 +117,8 @@ describe('LocationAutocomplete', () => {
       await user.keyboard('{ArrowDown}');
 
       // First item should be highlighted (has bg-blue-50 class)
-      const firstButton = screen.getByText('Stockholm').closest('button');
-      expect(firstButton).toHaveClass('bg-blue-50');
+      const firstOption = screen.getByText('Stockholm').closest('[role="option"]');
+      expect(firstOption).toHaveClass('bg-blue-50');
     });
 
     it('navigates up with ArrowUp', async () => {
@@ -115,8 +135,8 @@ describe('LocationAutocomplete', () => {
       // Navigate down twice then up once
       await user.keyboard('{ArrowDown}{ArrowDown}{ArrowUp}');
 
-      const firstButton = screen.getByText('Stockholm').closest('button');
-      expect(firstButton).toHaveClass('bg-blue-50');
+      const firstOption = screen.getByText('Stockholm').closest('[role="option"]');
+      expect(firstOption).toHaveClass('bg-blue-50');
     });
 
     it('selects highlighted item with Enter', async () => {
@@ -241,5 +261,246 @@ describe('LocationAutocomplete', () => {
 
     const input = screen.getByRole('textbox');
     expect(input).toBeDisabled();
+  });
+
+  describe('favorites and recent locations', () => {
+    it('shows empty state message on focus when no favorites or recent', async () => {
+      const user = userEvent.setup();
+      render(<LocationAutocomplete {...defaultProps} />);
+
+      const input = screen.getByRole('textbox');
+      await user.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Search for a location to get started')).toBeInTheDocument();
+      });
+    });
+
+    it('shows favorites section when favorites exist', async () => {
+      // Pre-populate localStorage with favorites
+      localStorage.setItem('weather-favorites', JSON.stringify([mockGoteborg]));
+
+      const user = userEvent.setup();
+      render(<LocationAutocomplete {...defaultProps} />);
+
+      const input = screen.getByRole('textbox');
+      await user.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Favorites')).toBeInTheDocument();
+        expect(screen.getByText('Göteborg')).toBeInTheDocument();
+      });
+    });
+
+    it('shows recent section when recent locations exist', async () => {
+      // Pre-populate localStorage with recent
+      localStorage.setItem('weather-recent', JSON.stringify([mockMalmo]));
+
+      const user = userEvent.setup();
+      render(<LocationAutocomplete {...defaultProps} />);
+
+      const input = screen.getByRole('textbox');
+      await user.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Recent')).toBeInTheDocument();
+        expect(screen.getByText('Malmö')).toBeInTheDocument();
+      });
+    });
+
+    it('adds location to favorites when clicking star button on search result', async () => {
+      const user = userEvent.setup();
+      render(<LocationAutocomplete {...defaultProps} />);
+
+      const input = screen.getByRole('textbox');
+      await user.type(input, 'Stock');
+
+      await waitFor(() => {
+        expect(screen.getByText('Stockholm')).toBeInTheDocument();
+      });
+
+      // Click the star button for Stockholm (first result)
+      const starButton = screen.getByLabelText('Add Stockholm to favorites');
+      await user.click(starButton);
+
+      // Check localStorage was updated
+      const favorites = JSON.parse(localStorage.getItem('weather-favorites') || '[]');
+      expect(favorites).toHaveLength(1);
+      expect(favorites[0].name).toBe('Stockholm');
+    });
+
+    it('removes location from favorites when clicking filled star', async () => {
+      // Pre-populate with a favorite
+      localStorage.setItem('weather-favorites', JSON.stringify([mockSuggestions[0]]));
+
+      const user = userEvent.setup();
+      render(<LocationAutocomplete {...defaultProps} />);
+
+      const input = screen.getByRole('textbox');
+      await user.type(input, 'Stock');
+
+      await waitFor(() => {
+        expect(screen.getByText('Stockholm')).toBeInTheDocument();
+      });
+
+      // Click the star button to remove from favorites
+      const starButton = screen.getByLabelText('Remove Stockholm from favorites');
+      await user.click(starButton);
+
+      // Check localStorage was updated
+      const favorites = JSON.parse(localStorage.getItem('weather-favorites') || '[]');
+      expect(favorites).toHaveLength(0);
+    });
+
+    it('clicking favorite selects it and calls onSelect', async () => {
+      localStorage.setItem('weather-favorites', JSON.stringify([mockGoteborg]));
+
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+
+      const input = screen.getByRole('textbox');
+      await user.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Göteborg')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByText('Göteborg'));
+
+      expect(onSelect).toHaveBeenCalledWith(mockGoteborg);
+    });
+
+    it('adds location to recent when selected from search results', async () => {
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+
+      const input = screen.getByRole('textbox');
+      await user.type(input, 'Stock');
+
+      await waitFor(() => {
+        expect(screen.getByText('Stockholm')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByText('Stockholm'));
+
+      // Check localStorage was updated with recent
+      const recent = JSON.parse(localStorage.getItem('weather-recent') || '[]');
+      expect(recent).toHaveLength(1);
+      expect(recent[0].name).toBe('Stockholm');
+    });
+
+    it('does not show location in recent if it is also in favorites', async () => {
+      // Add the same location to both favorites and recent
+      localStorage.setItem('weather-favorites', JSON.stringify([mockGoteborg]));
+      localStorage.setItem('weather-recent', JSON.stringify([mockGoteborg]));
+
+      const user = userEvent.setup();
+      render(<LocationAutocomplete {...defaultProps} />);
+
+      const input = screen.getByRole('textbox');
+      await user.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Favorites')).toBeInTheDocument();
+      });
+
+      // Should only appear once under favorites
+      const goteborgs = screen.getAllByText('Göteborg');
+      expect(goteborgs).toHaveLength(1);
+    });
+
+    it('shows Edit button for favorites and can remove favorites in edit mode', async () => {
+      localStorage.setItem('weather-favorites', JSON.stringify([mockGoteborg]));
+
+      const user = userEvent.setup();
+      render(<LocationAutocomplete {...defaultProps} />);
+
+      const input = screen.getByRole('textbox');
+      await user.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Edit')).toBeInTheDocument();
+      });
+
+      // Click Edit
+      await user.click(screen.getByText('Edit'));
+
+      // Should show Done button
+      expect(screen.getByText('Done')).toBeInTheDocument();
+
+      // Click remove button
+      const removeButton = screen.getByLabelText('Remove Göteborg from favorites');
+      await user.click(removeButton);
+
+      // Favorites should be empty
+      const favorites = JSON.parse(localStorage.getItem('weather-favorites') || '[]');
+      expect(favorites).toHaveLength(0);
+    });
+
+    it('keyboard navigation works across favorites and recent', async () => {
+      localStorage.setItem('weather-favorites', JSON.stringify([mockGoteborg]));
+      localStorage.setItem('weather-recent', JSON.stringify([mockMalmo]));
+
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+
+      const input = screen.getByRole('textbox');
+      await user.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByText('Göteborg')).toBeInTheDocument();
+        expect(screen.getByText('Malmö')).toBeInTheDocument();
+      });
+
+      // Navigate down to highlight Göteborg (favorite)
+      await user.keyboard('{ArrowDown}');
+      const favoriteOption = screen.getByText('Göteborg').closest('[role="option"]');
+      expect(favoriteOption).toHaveClass('bg-blue-50');
+
+      // Navigate down again to highlight Malmö (recent)
+      await user.keyboard('{ArrowDown}');
+      const recentOption = screen.getByText('Malmö').closest('[role="option"]');
+      expect(recentOption).toHaveClass('bg-blue-50');
+
+      // Press Enter to select Malmö
+      await user.keyboard('{Enter}');
+      expect(onSelect).toHaveBeenCalledWith(mockMalmo);
+    });
+
+    it('recent locations are limited to 5', async () => {
+      // Add 5 locations to recent
+      const locations: GeocodeResult[] = [];
+      for (let i = 0; i < 5; i++) {
+        locations.push({
+          placeId: 200 + i,
+          name: `Location ${i}`,
+          displayName: `Location ${i}, Sverige`,
+          coordinates: { lat: 59 + i * 0.1, lon: 18 + i * 0.1 },
+        });
+      }
+      localStorage.setItem('weather-recent', JSON.stringify(locations));
+
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+
+      const input = screen.getByRole('textbox');
+      await user.type(input, 'Stock');
+
+      await waitFor(() => {
+        expect(screen.getByText('Stockholm')).toBeInTheDocument();
+      });
+
+      // Select Stockholm - should be added to front of recent, pushing out the oldest
+      await user.click(screen.getByText('Stockholm'));
+
+      const recent = JSON.parse(localStorage.getItem('weather-recent') || '[]');
+      expect(recent).toHaveLength(5);
+      expect(recent[0].name).toBe('Stockholm'); // Newest is first
+      expect(recent.some((r: GeocodeResult) => r.name === 'Location 4')).toBe(false); // Oldest (Location 4 was at end) pushed out
+    });
   });
 });
