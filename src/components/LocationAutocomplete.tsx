@@ -110,6 +110,9 @@ export function LocationAutocomplete({
         e.preventDefault();
         if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
           handleSelect(suggestions[highlightedIndex]);
+        } else if (suggestions.length > 0) {
+          // Select first suggestion if none highlighted
+          handleSelect(suggestions[0]);
         }
         break;
       case 'Escape':
@@ -129,7 +132,7 @@ export function LocationAutocomplete({
 
   return (
     <div className="relative flex flex-col gap-2">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
       <div className="relative">
         <input
           ref={inputRef}
@@ -144,11 +147,11 @@ export function LocationAutocomplete({
           }}
           placeholder={placeholder}
           disabled={disabled}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pr-10 text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-800 dark:disabled:bg-gray-800"
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-400"></div>
           </div>
         )}
         {selectedLocation && !isLoading && (
@@ -167,10 +170,10 @@ export function LocationAutocomplete({
       {showDropdown && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800"
         >
           {suggestions.length > 1 && (
-            <div className="border-b border-gray-100 bg-amber-50 px-4 py-2 text-sm text-amber-700">
+            <div className="border-b border-gray-100 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-gray-700 dark:bg-amber-900/30 dark:text-amber-400">
               Multiple locations found - please select one:
             </div>
           )}
@@ -181,12 +184,12 @@ export function LocationAutocomplete({
               onMouseEnter={() => setHighlightedIndex(index)}
               className={`w-full px-4 py-3 text-left transition-colors ${
                 index === highlightedIndex
-                  ? 'bg-blue-50'
-                  : 'hover:bg-gray-50'
+                  ? 'bg-blue-50 dark:bg-blue-900/30'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
-              <div className="font-medium text-gray-900">{suggestion.name}</div>
-              <div className="text-sm text-gray-500">
+              <div className="font-medium text-gray-900 dark:text-gray-100">{suggestion.name}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
                 {formatDisplayName(suggestion.displayName)}
               </div>
             </button>

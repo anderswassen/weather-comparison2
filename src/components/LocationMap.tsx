@@ -92,8 +92,8 @@ export function LocationMap({ location1, location2 }: LocationMapProps) {
     <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
       <div ref={mapContainerRef} className="h-full w-full" />
       {!location1 && !location2 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80">
-          <p className="text-gray-500">Select locations to see them on the map</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 dark:bg-gray-800/80">
+          <p className="text-gray-500 dark:text-gray-400">Select locations to see them on the map</p>
         </div>
       )}
     </div>
