@@ -6,6 +6,7 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ComparisonDashboard } from '@/components/ComparisonDashboard';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { UserGuide } from '@/components/UserGuide';
 import { useWeatherComparison } from '@/hooks/useWeatherComparison';
 import { GeocodeResult } from '@/lib/types';
 
@@ -32,7 +33,8 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 dark:from-gray-900 dark:to-slate-900">
       <div className="mx-auto max-w-6xl px-4 py-8">
         <header className="relative mb-8 text-center">
-          <div className="absolute right-0 top-0">
+          <div className="absolute right-0 top-0 flex items-center gap-1">
+            <UserGuide />
             <ThemeToggle />
           </div>
           <h1 className="mb-2 text-4xl font-bold text-gray-800 dark:text-gray-100">Weather Compare</h1>
