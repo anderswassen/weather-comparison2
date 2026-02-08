@@ -45,8 +45,8 @@ function WindDirectionDot({ cx, cy, payload, color, dirKey }: any) {
       <circle cx={cx} cy={cy} r={3} fill={color} stroke={color} strokeWidth={2} />
       {dir != null && (
         <g transform={`translate(${cx}, ${cy}) rotate(${dir})`}>
-          <line x1={0} y1={-6} x2={0} y2={-15} stroke={color} strokeWidth={1.5} opacity={0.7} />
-          <polygon points="0,-16.5 -2.5,-12.5 2.5,-12.5" fill={color} opacity={0.7} />
+          <line x1={0} y1={-6} x2={0} y2={-17} stroke={color} strokeWidth={2} opacity={0.8} />
+          <polygon points="0,-19 -3.5,-13.5 3.5,-13.5" fill={color} opacity={0.8} />
         </g>
       )}
     </g>
