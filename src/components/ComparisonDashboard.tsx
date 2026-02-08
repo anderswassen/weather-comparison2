@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { LocationWeather, WeatherDataPoint } from '@/lib/types';
 import { WeatherChart } from './WeatherChart';
 import { WeatherSummaryCards } from './WeatherSummaryCards';
+import { WeatherInsights } from './WeatherInsights';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface ComparisonDashboardProps {
@@ -113,6 +114,9 @@ export function ComparisonDashboard({
           historicalLocation1={showHistorical ? historicalLocation1 : undefined}
           historicalLocation2={showHistorical ? historicalLocation2 : undefined}
         />
+        <div className="md:col-span-2">
+          <WeatherInsights location1={location1} location2={location2} />
+        </div>
       </div>
     </div>
   );

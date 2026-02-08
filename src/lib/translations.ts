@@ -111,6 +111,25 @@ const en: TranslationMap = {
   'tooltip.more': 'more',
   'tooltip.less': 'less',
   'tooltip.thanYear': 'than {year}',
+
+  // Insights
+  'insights.title': 'Interesting Facts',
+  'insights.tempDiff.headline': '{date}: {warmerLocation} is {diff}\u00B0C warmer',
+  'insights.tempDiff.description': 'Biggest temperature gap between the locations',
+  'insights.bestDay.headline': 'Best day out: {date} in {location}',
+  'insights.bestDay.description': '{temperature}\u00B0C, {windDescription}, {rainDescription}',
+  'insights.bestDay.lightWind': 'light wind',
+  'insights.bestDay.moderateWind': 'moderate wind',
+  'insights.bestDay.noRain': 'no rain',
+  'insights.bestDay.someRain': 'some rain',
+  'insights.tempTrend.headline': '{location} is {direction}',
+  'insights.tempTrend.warming': 'Rising {change}\u00B0C over the forecast',
+  'insights.tempTrend.cooling': 'Dropping {change}\u00B0C over the forecast',
+  'insights.tempTrend.directionWarming': 'warming up',
+  'insights.tempTrend.directionCooling': 'cooling down',
+  'insights.windChill.headline': '{date}: {location} feels like {feelsLike}\u00B0C',
+  'insights.windChill.description': 'Actual {actual}\u00B0C \u2014 wind makes it feel much colder',
+  'insights.noInsights': 'No notable weather differences found',
 };
 
 const sv: TranslationMap = {
@@ -222,6 +241,25 @@ const sv: TranslationMap = {
   'tooltip.more': 'mer',
   'tooltip.less': 'mindre',
   'tooltip.thanYear': 'än {year}',
+
+  // Insights
+  'insights.title': 'Intressanta fakta',
+  'insights.tempDiff.headline': '{date}: {warmerLocation} \u00E4r {diff}\u00B0C varmare',
+  'insights.tempDiff.description': 'St\u00F6rsta temperaturskillnaden mellan platserna',
+  'insights.bestDay.headline': 'B\u00E4sta utedagen: {date} i {location}',
+  'insights.bestDay.description': '{temperature}\u00B0C, {windDescription}, {rainDescription}',
+  'insights.bestDay.lightWind': 'l\u00E4tt vind',
+  'insights.bestDay.moderateWind': 'm\u00E5ttlig vind',
+  'insights.bestDay.noRain': 'inget regn',
+  'insights.bestDay.someRain': 'lite regn',
+  'insights.tempTrend.headline': '{location} {direction}',
+  'insights.tempTrend.warming': 'Stiger {change}\u00B0C under prognosen',
+  'insights.tempTrend.cooling': 'Sjunker {change}\u00B0C under prognosen',
+  'insights.tempTrend.directionWarming': 'blir varmare',
+  'insights.tempTrend.directionCooling': 'blir kallare',
+  'insights.windChill.headline': '{date}: {location} k\u00E4nns som {feelsLike}\u00B0C',
+  'insights.windChill.description': 'Faktiskt {actual}\u00B0C \u2014 vinden g\u00F6r att det k\u00E4nns mycket kallare',
+  'insights.noInsights': 'Inga anm\u00E4rkningsv\u00E4rda v\u00E4derskillnader hittades',
 };
 
 export const translations: Record<Language, TranslationMap> = { en, sv };

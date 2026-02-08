@@ -54,6 +54,22 @@ export function ChartSkeletonGrid() {
         <ChartSkeletonCard />
         <ChartSkeletonCard />
         <ChartSkeletonCard />
+
+        {/* Insights panel skeleton */}
+        <div className="rounded-xl bg-white p-4 shadow-md dark:bg-gray-800 md:col-span-2">
+          <div className="mb-4 h-6 w-40 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex gap-3">
+                <div className="h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="flex-1 space-y-1">
+                  <div className="h-5 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                  <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
