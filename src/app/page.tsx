@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -16,18 +17,79 @@ const LocationMap = dynamic(
   { ssr: false, loading: () => <div className="h-full min-h-[300px] animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" /> }
 );
 
-export default function Home() {
+function buildShareUrl(loc1: GeocodeResult, loc2: GeocodeResult): string {
+  const params = new URLSearchParams({
+    loc1: loc1.name,
+    lat1: loc1.coordinates.lat.toString(),
+    lon1: loc1.coordinates.lon.toString(),
+    loc2: loc2.name,
+    lat2: loc2.coordinates.lat.toString(),
+    lon2: loc2.coordinates.lon.toString(),
+  });
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
   const [selectedLocation1, setSelectedLocation1] = useState<GeocodeResult | null>(null);
   const [selectedLocation2, setSelectedLocation2] = useState<GeocodeResult | null>(null);
+  const [copied, setCopied] = useState(false);
   const { location1, location2, isLoading, error, compare } = useWeatherComparison();
 
-  const handleCompare = () => {
+  const handleCompare = useCallback(() => {
     if (selectedLocation1 && selectedLocation2) {
       compare(selectedLocation1, selectedLocation2);
+      window.history.replaceState(null, '', buildShareUrl(selectedLocation1, selectedLocation2));
+    }
+  }, [selectedLocation1, selectedLocation2, compare]);
+
+  // Parse URL params on mount and auto-trigger comparison
+  useEffect(() => {
+    const loc1 = searchParams.get('loc1');
+    const lat1 = searchParams.get('lat1');
+    const lon1 = searchParams.get('lon1');
+    const loc2 = searchParams.get('loc2');
+    const lat2 = searchParams.get('lat2');
+    const lon2 = searchParams.get('lon2');
+
+    if (loc1 && lat1 && lon1 && loc2 && lat2 && lon2) {
+      const parsedLat1 = parseFloat(lat1);
+      const parsedLon1 = parseFloat(lon1);
+      const parsedLat2 = parseFloat(lat2);
+      const parsedLon2 = parseFloat(lon2);
+
+      if ([parsedLat1, parsedLon1, parsedLat2, parsedLon2].every((v) => !isNaN(v))) {
+        const geocode1: GeocodeResult = {
+          placeId: 0,
+          name: loc1,
+          displayName: loc1,
+          coordinates: { lat: parsedLat1, lon: parsedLon1 },
+        };
+        const geocode2: GeocodeResult = {
+          placeId: 0,
+          name: loc2,
+          displayName: loc2,
+          coordinates: { lat: parsedLat2, lon: parsedLon2 },
+        };
+        setSelectedLocation1(geocode1);
+        setSelectedLocation2(geocode2);
+        compare(geocode1, geocode2);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleShare = async () => {
+    if (selectedLocation1 && selectedLocation2) {
+      const url = buildShareUrl(selectedLocation1, selectedLocation2);
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const canCompare = selectedLocation1 && selectedLocation2 && !isLoading;
+  const showShareButton = location1 && location2 && !isLoading;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 dark:from-gray-900 dark:to-slate-900">
@@ -62,14 +124,22 @@ export default function Home() {
                 disabled={isLoading}
               />
             </div>
-            <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex gap-3">
               <button
                 onClick={handleCompare}
                 disabled={!canCompare}
-                className="w-full rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400 dark:focus:ring-offset-gray-800"
+                className="flex-1 rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400 dark:focus:ring-offset-gray-800"
               >
                 {isLoading ? 'Loading...' : 'Compare Weather'}
               </button>
+              {showShareButton && (
+                <button
+                  onClick={handleShare}
+                  className="rounded-lg border border-blue-600 px-4 py-3 font-semibold text-blue-600 transition-colors hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/30 dark:focus:ring-offset-gray-800"
+                >
+                  {copied ? 'Copied!' : 'Share'}
+                </button>
+              )}
             </div>
           </div>
 
@@ -116,5 +186,13 @@ export default function Home() {
         </footer>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 dark:from-gray-900 dark:to-slate-900" />}>
+      <HomeContent />
+    </Suspense>
   );
 }
