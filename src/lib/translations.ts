@@ -85,7 +85,7 @@ const en: TranslationMap = {
 
 const sv: TranslationMap = {
   // Page
-  'page.title': 'Weather Compare',
+  'page.title': 'Jämför Väder',
   'page.subtitle': 'Jämför väderprognoser för två svenska platser',
   'page.firstLocation': 'Första platsen',
   'page.secondLocation': 'Andra platsen',
