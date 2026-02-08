@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ChartSkeletonGrid } from '@/components/ChartSkeleton';
 import { ComparisonDashboard } from '@/components/ComparisonDashboard';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -169,7 +169,7 @@ function HomeContent() {
           </div>
         )}
 
-        {isLoading && <LoadingSpinner message={t('page.fetchingWeather')} />}
+        {isLoading && <ChartSkeletonGrid />}
 
         {location1 && location2 && !isLoading && (
           <ComparisonDashboard

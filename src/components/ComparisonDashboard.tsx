@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { LocationWeather, WeatherDataPoint } from '@/lib/types';
 import { WeatherChart } from './WeatherChart';
+import { WeatherSummaryCards } from './WeatherSummaryCards';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface ComparisonDashboardProps {
@@ -72,6 +73,8 @@ export function ComparisonDashboard({
           </span>
         )}
       </div>
+
+      <WeatherSummaryCards location1={location1} location2={location2} />
 
       <div className="grid gap-6 md:grid-cols-2">
         <WeatherChart

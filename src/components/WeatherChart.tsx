@@ -13,6 +13,7 @@ import {
 import { format } from 'date-fns';
 import { LocationWeather, WeatherDataPoint } from '@/lib/types';
 import { useTheme } from '@/context/ThemeContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface WeatherChartProps {
   location1: LocationWeather;
@@ -73,13 +74,98 @@ export function WeatherChart({
   historicalLocation2,
 }: WeatherChartProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   // Theme-aware colors
   const gridStroke = isDark ? '#374151' : '#e5e7eb';
   const axisStroke = isDark ? '#9ca3af' : '#6b7280';
-  const tooltipBg = isDark ? '#1f2937' : 'white';
-  const tooltipBorder = isDark ? '#374151' : '#e5e7eb';
+
+  function getComparisonLabel(diff: number, metricType: typeof metric): string {
+    const absDiff = Math.abs(diff).toFixed(1);
+    if (metricType === 'temperature') {
+      return `${absDiff}${unit} ${diff >= 0 ? t('tooltip.warmer') : t('tooltip.cooler')}`;
+    }
+    if (metricType === 'windSpeed') {
+      return `${absDiff}${unit} ${diff >= 0 ? t('tooltip.stronger') : t('tooltip.weaker')}`;
+    }
+    if (metricType === 'precipitation') {
+      return `${absDiff}${unit} ${diff >= 0 ? t('tooltip.more') : t('tooltip.less')}`;
+    }
+    // humidity
+    return `${absDiff}${unit} ${diff >= 0 ? t('tooltip.higher') : t('tooltip.lower')}`;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function CustomTooltip({ active, payload, label }: any) {
+    if (!active || !payload || payload.length === 0) return null;
+
+    const loc1Entry = payload.find((p: any) => p.dataKey === location1.locationName);
+    const loc2Entry = payload.find((p: any) => p.dataKey === location2.locationName);
+    const val1 = loc1Entry?.value as number | undefined;
+    const val2 = loc2Entry?.value as number | undefined;
+
+    return (
+      <div className={`rounded-lg border p-3 shadow-lg ${isDark ? 'border-gray-600 bg-gray-800 text-gray-100' : 'border-gray-200 bg-white text-gray-800'}`}>
+        <p className="mb-2 text-sm font-semibold">{label}</p>
+
+        {/* Current values */}
+        {val1 != null && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-blue-500" />
+            <span>{location1.locationName}: {val1}{unit}</span>
+          </div>
+        )}
+        {val2 != null && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500" />
+            <span>{location2.locationName}: {val2}{unit}</span>
+          </div>
+        )}
+
+        {/* Difference between locations */}
+        {val1 != null && val2 != null && (
+          <>
+            <hr className={`my-2 ${isDark ? 'border-gray-600' : 'border-gray-200'}`} />
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {location1.locationName}: {getComparisonLabel(val1 - val2, metric)}
+            </p>
+          </>
+        )}
+
+        {/* Historical comparisons */}
+        {historicalYear && payload.length > 0 && (
+          <>
+            {(() => {
+              const hist1Entry = hist1Key ? payload.find((p: any) => p.dataKey === hist1Key) : null;
+              const hist2Entry = hist2Key ? payload.find((p: any) => p.dataKey === hist2Key) : null;
+              const histVal1 = hist1Entry?.value as number | undefined;
+              const histVal2 = hist2Entry?.value as number | undefined;
+              const hasHistComparison = (val1 != null && histVal1 != null) || (val2 != null && histVal2 != null);
+
+              if (!hasHistComparison) return null;
+
+              return (
+                <>
+                  <hr className={`my-2 ${isDark ? 'border-gray-600' : 'border-gray-200'}`} />
+                  {val1 != null && histVal1 != null && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {location1.locationName}: {getComparisonLabel(val1 - histVal1, metric)} {t('tooltip.thanYear', { year: String(historicalYear) })}
+                    </p>
+                  )}
+                  {val2 != null && histVal2 != null && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {location2.locationName}: {getComparisonLabel(val2 - histVal2, metric)} {t('tooltip.thanYear', { year: String(historicalYear) })}
+                    </p>
+                  )}
+                </>
+              );
+            })()}
+          </>
+        )}
+      </div>
+    );
+  }
 
   // Determine the historical year from the data
   const historicalYear = historicalLocation1?.[0]?.date
@@ -137,14 +223,7 @@ export function WeatherChart({
             <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
             <XAxis dataKey="date" tick={{ fontSize: 12, fill: axisStroke }} stroke={axisStroke} />
             <YAxis tick={{ fontSize: 12, fill: axisStroke }} stroke={axisStroke} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: tooltipBg,
-                border: `1px solid ${tooltipBorder}`,
-                borderRadius: '8px',
-                color: isDark ? '#f3f4f6' : '#1f2937',
-              }}
-            />
+            <Tooltip content={CustomTooltip} />
             <Legend content={renderCustomLegend} />
             <Line
               type="monotone"

@@ -26,6 +26,12 @@ const en: TranslationMap = {
   'comparison.showHistorical': 'Show last year\'s weather',
   'comparison.loadingHistorical': 'Loading historical data...',
 
+  // Summary Cards
+  'summary.avgTemp': 'Avg Temp',
+  'summary.maxWind': 'Max Wind',
+  'summary.avgHumidity': 'Avg Humidity',
+  'summary.totalPrecip': 'Total Precip',
+
   // Location Autocomplete
   'location.searchPlaceholder': 'Search for a Swedish location',
   'location.emptyState': 'Search for a location to get started',
@@ -83,6 +89,17 @@ const en: TranslationMap = {
 4. Use the interactive charts to explore the data`,
   'guide.section6.title': 'Dark Mode',
   'guide.section6.content': 'Click the sun/moon icon in the top right corner to switch between light and dark mode. Your preference is saved automatically.',
+
+  // Tooltip comparisons
+  'tooltip.warmer': 'warmer',
+  'tooltip.cooler': 'cooler',
+  'tooltip.stronger': 'stronger',
+  'tooltip.weaker': 'weaker',
+  'tooltip.higher': 'higher',
+  'tooltip.lower': 'lower',
+  'tooltip.more': 'more',
+  'tooltip.less': 'less',
+  'tooltip.thanYear': 'than {year}',
 };
 
 const sv: TranslationMap = {
@@ -108,6 +125,12 @@ const sv: TranslationMap = {
   'comparison.precipitation': 'Nederbörd',
   'comparison.showHistorical': 'Visa förra årets väder',
   'comparison.loadingHistorical': 'Laddar historisk data...',
+
+  // Summary Cards
+  'summary.avgTemp': 'Medeltemp',
+  'summary.maxWind': 'Max vind',
+  'summary.avgHumidity': 'Medelfuktighet',
+  'summary.totalPrecip': 'Total nederbörd',
 
   // Location Autocomplete
   'location.searchPlaceholder': 'Sök efter en svensk plats',
@@ -166,6 +189,17 @@ const sv: TranslationMap = {
 4. Använd de interaktiva diagrammen för att utforska datan`,
   'guide.section6.title': 'Mörkt läge',
   'guide.section6.content': 'Klicka på sol-/månikonen i det övre högra hörnet för att växla mellan ljust och mörkt läge. Din inställning sparas automatiskt.',
+
+  // Tooltip comparisons
+  'tooltip.warmer': 'varmare',
+  'tooltip.cooler': 'kallare',
+  'tooltip.stronger': 'starkare',
+  'tooltip.weaker': 'svagare',
+  'tooltip.higher': 'högre',
+  'tooltip.lower': 'lägre',
+  'tooltip.more': 'mer',
+  'tooltip.less': 'mindre',
+  'tooltip.thanYear': 'än {year}',
 };
 
 export const translations: Record<Language, TranslationMap> = { en, sv };
