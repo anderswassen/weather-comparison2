@@ -7,8 +7,10 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ComparisonDashboard } from '@/components/ComparisonDashboard';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { UserGuide } from '@/components/UserGuide';
 import { useWeatherComparison } from '@/hooks/useWeatherComparison';
+import { useLanguage } from '@/context/LanguageContext';
 import { GeocodeResult } from '@/lib/types';
 
 // Dynamically import the map to avoid SSR issues with Leaflet
@@ -31,6 +33,7 @@ function buildShareUrl(loc1: GeocodeResult, loc2: GeocodeResult): string {
 
 function HomeContent() {
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
   const [selectedLocation1, setSelectedLocation1] = useState<GeocodeResult | null>(null);
   const [selectedLocation2, setSelectedLocation2] = useState<GeocodeResult | null>(null);
   const [copied, setCopied] = useState(false);
@@ -97,11 +100,12 @@ function HomeContent() {
         <header className="relative mb-8 pt-10 text-center sm:pt-0">
           <div className="absolute right-0 top-0 flex items-center gap-1">
             <UserGuide />
+            <LanguageToggle />
             <ThemeToggle />
           </div>
-          <h1 className="mb-2 text-4xl font-bold text-gray-800 dark:text-gray-100">Weather Compare</h1>
+          <h1 className="mb-2 text-4xl font-bold text-gray-800 dark:text-gray-100">{t('page.title')}</h1>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Compare weather forecasts for two Swedish locations
+            {t('page.subtitle')}
           </p>
         </header>
 
@@ -110,15 +114,15 @@ function HomeContent() {
           <div className="rounded-xl bg-white p-6 shadow-md dark:bg-gray-800 lg:col-span-2">
             <div className="flex flex-col gap-4">
               <LocationAutocomplete
-                label="First Location"
-                placeholder="Search for a location..."
+                label={t('page.firstLocation')}
+                placeholder={t('page.searchPlaceholder')}
                 selectedLocation={selectedLocation1}
                 onSelect={setSelectedLocation1}
                 disabled={isLoading}
               />
               <LocationAutocomplete
-                label="Second Location"
-                placeholder="Search for a location..."
+                label={t('page.secondLocation')}
+                placeholder={t('page.searchPlaceholder')}
                 selectedLocation={selectedLocation2}
                 onSelect={setSelectedLocation2}
                 disabled={isLoading}
@@ -130,14 +134,14 @@ function HomeContent() {
                 disabled={!canCompare}
                 className="flex-1 rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400 dark:focus:ring-offset-gray-800"
               >
-                {isLoading ? 'Loading...' : 'Compare Weather'}
+                {isLoading ? t('page.loading') : t('page.compareWeather')}
               </button>
               {showShareButton && (
                 <button
                   onClick={handleShare}
                   className="rounded-lg border border-blue-600 px-4 py-3 font-semibold text-blue-600 transition-colors hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/30 dark:focus:ring-offset-gray-800"
                 >
-                  {copied ? 'Copied!' : 'Share'}
+                  {copied ? t('page.copied') : t('page.share')}
                 </button>
               )}
             </div>
@@ -151,11 +155,11 @@ function HomeContent() {
 
         {error && (
           <div className="mb-8 rounded-lg border border-red-200 bg-red-50 p-4 text-center text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400">
-            {error}
+            {error === 'ERROR_UNEXPECTED' ? t('error.unexpected') : error}
           </div>
         )}
 
-        {isLoading && <LoadingSpinner message="Fetching weather data..." />}
+        {isLoading && <LoadingSpinner message={t('page.fetchingWeather')} />}
 
         {location1 && location2 && !isLoading && (
           <ComparisonDashboard location1={location1} location2={location2} />
@@ -163,7 +167,7 @@ function HomeContent() {
 
         <footer className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>
-            Weather data provided by{' '}
+            {t('page.footerWeatherData')}{' '}
             <a
               href="https://www.smhi.se/data/oppna-data"
               target="_blank"
@@ -172,7 +176,7 @@ function HomeContent() {
             >
               SMHI
             </a>
-            . Geocoding by{' '}
+            . {t('page.footerGeocoding')}{' '}
             <a
               href="https://www.openstreetmap.org/"
               target="_blank"

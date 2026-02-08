@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { GeocodeResult } from '@/lib/types';
 import { searchLocations } from '@/lib/nominatim';
 import { useLocationStorage } from '@/hooks/useLocationStorage';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface LocationAutocompleteProps {
   label: string;
@@ -15,11 +16,13 @@ interface LocationAutocompleteProps {
 
 export function LocationAutocomplete({
   label,
-  placeholder = 'Search for a Swedish location',
+  placeholder,
   selectedLocation,
   onSelect,
   disabled = false,
 }: LocationAutocompleteProps) {
+  const { t } = useLanguage();
+  const resolvedPlaceholder = placeholder ?? t('location.searchPlaceholder');
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState<GeocodeResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -202,7 +205,7 @@ export function LocationAutocomplete({
       >
         {isEmpty && (
           <div className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-            Search for a location to get started
+            {t('location.emptyState')}
           </div>
         )}
 
@@ -210,7 +213,7 @@ export function LocationAutocomplete({
           <div>
             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2 dark:border-gray-700">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                <span className="mr-1">★</span> Favorites
+                <span className="mr-1">★</span> {t('location.favorites')}
               </span>
               <button
                 onClick={(e) => {
@@ -219,7 +222,7 @@ export function LocationAutocomplete({
                 }}
                 className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
               >
-                {editingFavorites ? 'Done' : 'Edit'}
+                {editingFavorites ? t('location.done') : t('location.edit')}
               </button>
             </div>
             {favorites.map((location, index) => (
@@ -248,7 +251,7 @@ export function LocationAutocomplete({
                       removeFavorite(location.placeId);
                     }}
                     className="rounded p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
-                    aria-label={`Remove ${location.name} from favorites`}
+                    aria-label={t('location.removeFavoriteAria', { name: location.name })}
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -264,7 +267,7 @@ export function LocationAutocomplete({
           <div>
             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2 dark:border-gray-700">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                <span className="mr-1">↻</span> Recent
+                <span className="mr-1">↻</span> {t('location.recent')}
               </span>
             </div>
             {recent
@@ -305,7 +308,7 @@ export function LocationAutocomplete({
     >
       {suggestions.length > 1 && (
         <div className="border-b border-gray-100 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-gray-700 dark:bg-amber-900/30 dark:text-amber-400">
-          Multiple locations found - please select one:
+          {t('location.multipleFound')}
         </div>
       )}
       {suggestions.map((suggestion, index) => (
@@ -330,7 +333,7 @@ export function LocationAutocomplete({
           <button
             onClick={(e) => handleToggleFavorite(suggestion, e)}
             className="ml-2 rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-600"
-            aria-label={isFavorite(suggestion.placeId) ? `Remove ${suggestion.name} from favorites` : `Add ${suggestion.name} to favorites`}
+            aria-label={isFavorite(suggestion.placeId) ? t('location.removeFavoriteAria', { name: suggestion.name }) : t('location.addFavoriteAria', { name: suggestion.name })}
           >
             <StarIcon filled={isFavorite(suggestion.placeId)} />
           </button>
@@ -350,7 +353,7 @@ export function LocationAutocomplete({
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={disabled}
           className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pr-10 text-gray-900 placeholder-gray-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:border-blue-400 dark:focus:ring-blue-800 dark:disabled:bg-gray-800"
         />

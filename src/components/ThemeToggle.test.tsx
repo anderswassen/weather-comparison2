@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeToggle } from './ThemeToggle';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 describe('ThemeToggle', () => {
   const matchMediaMock = (matches: boolean) =>
@@ -32,18 +33,28 @@ describe('ThemeToggle', () => {
 
   beforeEach(() => {
     localStorageMock.clear();
+    localStorageMock.getItem.mockReset();
+    // Set English so aria-label assertions match English strings
+    localStorageMock.getItem.mockImplementation((key: string) =>
+      key === 'language-preference' ? 'en' : null
+    );
     Object.defineProperty(window, 'localStorage', { value: localStorageMock });
     document.documentElement.classList.remove('dark');
   });
 
+  const renderToggle = () =>
+    render(
+      <ThemeProvider>
+        <LanguageProvider>
+          <ThemeToggle />
+        </LanguageProvider>
+      </ThemeProvider>
+    );
+
   it('renders a button', () => {
     window.matchMedia = matchMediaMock(false);
 
-    render(
-      <ThemeProvider>
-        <ThemeToggle />
-      </ThemeProvider>
-    );
+    renderToggle();
 
     expect(screen.getByRole('button')).toBeInTheDocument();
   });
@@ -51,11 +62,7 @@ describe('ThemeToggle', () => {
   it('has correct aria-label in light mode', () => {
     window.matchMedia = matchMediaMock(false);
 
-    render(
-      <ThemeProvider>
-        <ThemeToggle />
-      </ThemeProvider>
-    );
+    renderToggle();
 
     expect(screen.getByRole('button')).toHaveAttribute(
       'aria-label',
@@ -66,11 +73,7 @@ describe('ThemeToggle', () => {
   it('has correct aria-label in dark mode', () => {
     window.matchMedia = matchMediaMock(true);
 
-    render(
-      <ThemeProvider>
-        <ThemeToggle />
-      </ThemeProvider>
-    );
+    renderToggle();
 
     expect(screen.getByRole('button')).toHaveAttribute(
       'aria-label',
@@ -82,11 +85,7 @@ describe('ThemeToggle', () => {
     const user = userEvent.setup();
     window.matchMedia = matchMediaMock(false);
 
-    render(
-      <ThemeProvider>
-        <ThemeToggle />
-      </ThemeProvider>
-    );
+    renderToggle();
 
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('aria-label', 'Switch to dark mode');
@@ -99,11 +98,7 @@ describe('ThemeToggle', () => {
   it('renders moon icon in light mode', () => {
     window.matchMedia = matchMediaMock(false);
 
-    render(
-      <ThemeProvider>
-        <ThemeToggle />
-      </ThemeProvider>
-    );
+    renderToggle();
 
     const button = screen.getByRole('button');
     const svg = button.querySelector('svg');
@@ -115,11 +110,7 @@ describe('ThemeToggle', () => {
   it('renders sun icon in dark mode', () => {
     window.matchMedia = matchMediaMock(true);
 
-    render(
-      <ThemeProvider>
-        <ThemeToggle />
-      </ThemeProvider>
-    );
+    renderToggle();
 
     const button = screen.getByRole('button');
     const svg = button.querySelector('svg');

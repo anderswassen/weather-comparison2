@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { GeocodeResult } from '@/lib/types';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface LocationMapProps {
   location1: GeocodeResult | null;
@@ -11,6 +12,7 @@ interface LocationMapProps {
 }
 
 export function LocationMap({ location1, location2 }: LocationMapProps) {
+  const { t } = useLanguage();
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const markersRef = useRef<L.Marker[]>([]);
@@ -93,7 +95,7 @@ export function LocationMap({ location1, location2 }: LocationMapProps) {
       <div ref={mapContainerRef} className="h-full w-full" />
       {!location1 && !location2 && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 dark:bg-gray-800/80">
-          <p className="text-gray-500 dark:text-gray-400">Select locations to see them on the map</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('map.emptyState')}</p>
         </div>
       )}
     </div>

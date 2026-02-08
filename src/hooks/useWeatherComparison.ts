@@ -47,7 +47,7 @@ export function useWeatherComparison(): UseWeatherComparisonResult {
         weatherData: dailyWeather2,
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      const message = err instanceof Error ? err.message : 'ERROR_UNEXPECTED';
       setError(message);
     } finally {
       setIsLoading(false);

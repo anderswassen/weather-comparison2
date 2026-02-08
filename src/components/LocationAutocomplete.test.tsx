@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LocationAutocomplete } from './LocationAutocomplete';
+import { LanguageProvider } from '@/context/LanguageContext';
 import { GeocodeResult } from '@/lib/types';
 
 // Mock the nominatim module
@@ -58,8 +59,9 @@ describe('LocationAutocomplete', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSearchLocations.mockResolvedValue(mockSuggestions);
-    // Clear localStorage before each test
+    // Clear localStorage and set English for consistent test assertions
     localStorage.clear();
+    localStorage.setItem('language-preference', 'en');
   });
 
   afterEach(() => {
@@ -67,7 +69,11 @@ describe('LocationAutocomplete', () => {
   });
 
   it('renders with label and placeholder', () => {
-    render(<LocationAutocomplete {...defaultProps} placeholder="Search location" />);
+    render(
+      <LanguageProvider>
+        <LocationAutocomplete {...defaultProps} placeholder="Search location" />
+      </LanguageProvider>
+    );
 
     expect(screen.getByText('Location')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Search location')).toBeInTheDocument();
@@ -75,7 +81,11 @@ describe('LocationAutocomplete', () => {
 
   it('shows suggestions when typing', async () => {
     const user = userEvent.setup();
-    render(<LocationAutocomplete {...defaultProps} />);
+    render(
+      <LanguageProvider>
+        <LocationAutocomplete {...defaultProps} />
+      </LanguageProvider>
+    );
 
     const input = screen.getByRole('textbox');
     await user.type(input, 'Stock');
@@ -88,7 +98,11 @@ describe('LocationAutocomplete', () => {
   it('calls onSelect when clicking a suggestion', async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
-    render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+    render(
+      <LanguageProvider>
+        <LocationAutocomplete {...defaultProps} onSelect={onSelect} />
+      </LanguageProvider>
+    );
 
     const input = screen.getByRole('textbox');
     await user.type(input, 'Stock');
@@ -105,7 +119,11 @@ describe('LocationAutocomplete', () => {
   describe('keyboard navigation', () => {
     it('navigates down with ArrowDown', async () => {
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
@@ -123,7 +141,11 @@ describe('LocationAutocomplete', () => {
 
     it('navigates up with ArrowUp', async () => {
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
@@ -142,7 +164,11 @@ describe('LocationAutocomplete', () => {
     it('selects highlighted item with Enter', async () => {
       const user = userEvent.setup();
       const onSelect = vi.fn();
-      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} onSelect={onSelect} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
@@ -160,7 +186,11 @@ describe('LocationAutocomplete', () => {
     it('selects first suggestion with Enter when none highlighted', async () => {
       const user = userEvent.setup();
       const onSelect = vi.fn();
-      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} onSelect={onSelect} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
@@ -177,7 +207,11 @@ describe('LocationAutocomplete', () => {
 
     it('closes dropdown with Escape', async () => {
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
@@ -196,11 +230,13 @@ describe('LocationAutocomplete', () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
     render(
-      <LocationAutocomplete
-        {...defaultProps}
-        onSelect={onSelect}
-        selectedLocation={mockSuggestions[0]}
-      />
+      <LanguageProvider>
+        <LocationAutocomplete
+          {...defaultProps}
+          onSelect={onSelect}
+          selectedLocation={mockSuggestions[0]}
+        />
+      </LanguageProvider>
     );
 
     const input = screen.getByRole('textbox');
@@ -217,7 +253,11 @@ describe('LocationAutocomplete', () => {
       () => new Promise((resolve) => setTimeout(() => resolve(mockSuggestions), 500))
     );
 
-    render(<LocationAutocomplete {...defaultProps} />);
+    render(
+      <LanguageProvider>
+        <LocationAutocomplete {...defaultProps} />
+      </LanguageProvider>
+    );
 
     const input = screen.getByRole('textbox');
     await user.type(input, 'Stock');
@@ -230,7 +270,11 @@ describe('LocationAutocomplete', () => {
 
   it('shows multiple locations message when more than one result', async () => {
     const user = userEvent.setup();
-    render(<LocationAutocomplete {...defaultProps} />);
+    render(
+      <LanguageProvider>
+        <LocationAutocomplete {...defaultProps} />
+      </LanguageProvider>
+    );
 
     const input = screen.getByRole('textbox');
     await user.type(input, 'Stock');
@@ -244,7 +288,11 @@ describe('LocationAutocomplete', () => {
     const user = userEvent.setup();
     mockSearchLocations.mockResolvedValue([mockSuggestions[0]]);
 
-    render(<LocationAutocomplete {...defaultProps} />);
+    render(
+      <LanguageProvider>
+        <LocationAutocomplete {...defaultProps} />
+      </LanguageProvider>
+    );
 
     const input = screen.getByRole('textbox');
     await user.type(input, 'Stock');
@@ -257,7 +305,11 @@ describe('LocationAutocomplete', () => {
   });
 
   it('disables input when disabled prop is true', () => {
-    render(<LocationAutocomplete {...defaultProps} disabled />);
+    render(
+      <LanguageProvider>
+        <LocationAutocomplete {...defaultProps} disabled />
+      </LanguageProvider>
+    );
 
     const input = screen.getByRole('textbox');
     expect(input).toBeDisabled();
@@ -266,7 +318,11 @@ describe('LocationAutocomplete', () => {
   describe('favorites and recent locations', () => {
     it('shows empty state message on focus when no favorites or recent', async () => {
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.click(input);
@@ -281,7 +337,11 @@ describe('LocationAutocomplete', () => {
       localStorage.setItem('weather-favorites', JSON.stringify([mockGoteborg]));
 
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.click(input);
@@ -297,7 +357,11 @@ describe('LocationAutocomplete', () => {
       localStorage.setItem('weather-recent', JSON.stringify([mockMalmo]));
 
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.click(input);
@@ -310,7 +374,11 @@ describe('LocationAutocomplete', () => {
 
     it('adds location to favorites when clicking star button on search result', async () => {
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
@@ -334,7 +402,11 @@ describe('LocationAutocomplete', () => {
       localStorage.setItem('weather-favorites', JSON.stringify([mockSuggestions[0]]));
 
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
@@ -357,7 +429,11 @@ describe('LocationAutocomplete', () => {
 
       const user = userEvent.setup();
       const onSelect = vi.fn();
-      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} onSelect={onSelect} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.click(input);
@@ -374,7 +450,11 @@ describe('LocationAutocomplete', () => {
     it('adds location to recent when selected from search results', async () => {
       const user = userEvent.setup();
       const onSelect = vi.fn();
-      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} onSelect={onSelect} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
@@ -397,7 +477,11 @@ describe('LocationAutocomplete', () => {
       localStorage.setItem('weather-recent', JSON.stringify([mockGoteborg]));
 
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.click(input);
@@ -415,7 +499,11 @@ describe('LocationAutocomplete', () => {
       localStorage.setItem('weather-favorites', JSON.stringify([mockGoteborg]));
 
       const user = userEvent.setup();
-      render(<LocationAutocomplete {...defaultProps} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.click(input);
@@ -445,7 +533,11 @@ describe('LocationAutocomplete', () => {
 
       const user = userEvent.setup();
       const onSelect = vi.fn();
-      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} onSelect={onSelect} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.click(input);
@@ -485,7 +577,11 @@ describe('LocationAutocomplete', () => {
 
       const user = userEvent.setup();
       const onSelect = vi.fn();
-      render(<LocationAutocomplete {...defaultProps} onSelect={onSelect} />);
+      render(
+        <LanguageProvider>
+          <LocationAutocomplete {...defaultProps} onSelect={onSelect} />
+        </LanguageProvider>
+      );
 
       const input = screen.getByRole('textbox');
       await user.type(input, 'Stock');
