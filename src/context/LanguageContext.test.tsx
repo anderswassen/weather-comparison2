@@ -87,7 +87,7 @@ describe('LanguageContext', () => {
       </LanguageProvider>
     );
 
-    expect(screen.getByTestId('translated')).toHaveTextContent('Weather Compare');
+    expect(screen.getByTestId('translated')).toHaveTextContent('Jämför Väder');
     expect(screen.getByTestId('interpolated')).toHaveTextContent('Ta bort Stockholm från favoriter');
   });
 

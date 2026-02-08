@@ -23,6 +23,8 @@ const en: TranslationMap = {
   'comparison.windSpeed': 'Wind Speed',
   'comparison.humidity': 'Humidity',
   'comparison.precipitation': 'Precipitation',
+  'comparison.showHistorical': 'Show last year\'s weather',
+  'comparison.loadingHistorical': 'Loading historical data...',
 
   // Location Autocomplete
   'location.searchPlaceholder': 'Search for a Swedish location',
@@ -104,6 +106,8 @@ const sv: TranslationMap = {
   'comparison.windSpeed': 'Vindhastighet',
   'comparison.humidity': 'Luftfuktighet',
   'comparison.precipitation': 'Nederbörd',
+  'comparison.showHistorical': 'Visa förra årets väder',
+  'comparison.loadingHistorical': 'Laddar historisk data...',
 
   // Location Autocomplete
   'location.searchPlaceholder': 'Sök efter en svensk plats',

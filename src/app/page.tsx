@@ -37,7 +37,17 @@ function HomeContent() {
   const [selectedLocation1, setSelectedLocation1] = useState<GeocodeResult | null>(null);
   const [selectedLocation2, setSelectedLocation2] = useState<GeocodeResult | null>(null);
   const [copied, setCopied] = useState(false);
-  const { location1, location2, isLoading, error, compare } = useWeatherComparison();
+  const {
+    location1,
+    location2,
+    isLoading,
+    error,
+    compare,
+    historicalLocation1,
+    historicalLocation2,
+    isLoadingHistorical,
+    fetchHistorical,
+  } = useWeatherComparison();
 
   const handleCompare = useCallback(() => {
     if (selectedLocation1 && selectedLocation2) {
@@ -162,7 +172,14 @@ function HomeContent() {
         {isLoading && <LoadingSpinner message={t('page.fetchingWeather')} />}
 
         {location1 && location2 && !isLoading && (
-          <ComparisonDashboard location1={location1} location2={location2} />
+          <ComparisonDashboard
+            location1={location1}
+            location2={location2}
+            historicalLocation1={historicalLocation1}
+            historicalLocation2={historicalLocation2}
+            isLoadingHistorical={isLoadingHistorical}
+            fetchHistorical={fetchHistorical}
+          />
         )}
 
         <footer className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
