@@ -23,8 +23,19 @@ const en: TranslationMap = {
   'comparison.windSpeed': 'Wind Speed',
   'comparison.humidity': 'Humidity',
   'comparison.precipitation': 'Precipitation',
+  'comparison.windDirection': 'Wind Direction',
   'comparison.showHistorical': 'Show last year\'s weather',
   'comparison.loadingHistorical': 'Loading historical data...',
+
+  // Compass
+  'compass.N': 'N',
+  'compass.NE': 'NE',
+  'compass.E': 'E',
+  'compass.SE': 'SE',
+  'compass.S': 'S',
+  'compass.SW': 'SW',
+  'compass.W': 'W',
+  'compass.NW': 'NW',
 
   // Summary Cards
   'summary.avgTemp': 'Avg Temp',
@@ -123,8 +134,19 @@ const sv: TranslationMap = {
   'comparison.windSpeed': 'Vindhastighet',
   'comparison.humidity': 'Luftfuktighet',
   'comparison.precipitation': 'Nederbörd',
+  'comparison.windDirection': 'Vindriktning',
   'comparison.showHistorical': 'Visa förra årets väder',
   'comparison.loadingHistorical': 'Laddar historisk data...',
+
+  // Compass
+  'compass.N': 'N',
+  'compass.NE': 'NO',
+  'compass.E': 'O',
+  'compass.SE': 'SO',
+  'compass.S': 'S',
+  'compass.SW': 'SV',
+  'compass.W': 'V',
+  'compass.NW': 'NV',
 
   // Summary Cards
   'summary.avgTemp': 'Medeltemp',

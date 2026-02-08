@@ -9,6 +9,7 @@ export interface WeatherDataPoint {
   windSpeed: number;
   humidity: number;
   precipitation: number;
+  windDirection?: number;
 }
 
 export interface LocationWeather {

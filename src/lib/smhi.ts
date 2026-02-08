@@ -20,6 +20,7 @@ export function parseWeatherData(data: SMHIResponse): WeatherDataPoint[] {
     const windSpeed = getParameterValue(timeSeries, 'ws');
     const humidity = getParameterValue(timeSeries, 'r');
     const precipitation = getParameterValue(timeSeries, 'pmean');
+    const windDirection = getParameterValue(timeSeries, 'wd');
 
     if (temperature !== null && windSpeed !== null && humidity !== null && precipitation !== null) {
       weatherPoints.push({
@@ -28,6 +29,7 @@ export function parseWeatherData(data: SMHIResponse): WeatherDataPoint[] {
         windSpeed,
         humidity,
         precipitation,
+        windDirection: windDirection ?? undefined,
       });
     }
   }
@@ -52,6 +54,19 @@ export async function fetchWeatherData(coordinates: Coordinates): Promise<Weathe
   return parseWeatherData(data);
 }
 
+export function circularMeanDegrees(degrees: number[]): number {
+  const toRad = Math.PI / 180;
+  let sinSum = 0;
+  let cosSum = 0;
+  for (const d of degrees) {
+    sinSum += Math.sin(d * toRad);
+    cosSum += Math.cos(d * toRad);
+  }
+  let mean = Math.atan2(sinSum / degrees.length, cosSum / degrees.length) * (180 / Math.PI);
+  if (mean < 0) mean += 360;
+  return Math.round(mean * 10) / 10;
+}
+
 export function aggregateDailyData(hourlyData: WeatherDataPoint[]): WeatherDataPoint[] {
   const dailyMap = new Map<string, WeatherDataPoint[]>();
 
@@ -72,12 +87,16 @@ export function aggregateDailyData(hourlyData: WeatherDataPoint[]): WeatherDataP
     const avgHumidity = points.reduce((sum, p) => sum + p.humidity, 0) / points.length;
     const totalPrecipitation = points.reduce((sum, p) => sum + p.precipitation, 0);
 
+    const windDirValues = points.map((p) => p.windDirection).filter((d): d is number => d != null);
+    const avgWindDirection = windDirValues.length > 0 ? circularMeanDegrees(windDirValues) : undefined;
+
     dailyData.push({
       date: new Date(dateKey),
       temperature: Math.round(avgTemperature * 10) / 10,
       windSpeed: Math.round(avgWindSpeed * 10) / 10,
       humidity: Math.round(avgHumidity),
       precipitation: Math.round(totalPrecipitation * 10) / 10,
+      windDirection: avgWindDirection,
     });
   }
 

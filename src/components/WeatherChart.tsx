@@ -29,6 +29,30 @@ function hasNonZeroMetric(data: WeatherDataPoint[], metric: string): boolean {
   return data.some((p) => p[metric as keyof WeatherDataPoint] !== 0);
 }
 
+const CARDINAL_KEYS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
+
+function degreesToCardinalKey(deg: number): (typeof CARDINAL_KEYS)[number] {
+  const index = Math.round(deg / 45) % 8;
+  return CARDINAL_KEYS[index];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function WindDirectionDot({ cx, cy, payload, color, dirKey }: any) {
+  if (cx == null || cy == null) return null;
+  const dir = payload?.[dirKey] as number | null;
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={3} fill={color} stroke={color} strokeWidth={2} />
+      {dir != null && (
+        <g transform={`translate(${cx}, ${cy}) rotate(${dir})`}>
+          <line x1={0} y1={-6} x2={0} y2={-15} stroke={color} strokeWidth={1.5} opacity={0.7} />
+          <polygon points="0,-16.5 -2.5,-12.5 2.5,-12.5" fill={color} opacity={0.7} />
+        </g>
+      )}
+    </g>
+  );
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function renderCustomLegend(props: any) {
   const payload = props?.payload as Array<{
@@ -104,6 +128,8 @@ export function WeatherChart({
     const loc2Entry = payload.find((p: any) => p.dataKey === location2.locationName);
     const val1 = loc1Entry?.value as number | undefined;
     const val2 = loc2Entry?.value as number | undefined;
+    const windDir1 = payload[0]?.payload?._windDir1 as number | undefined;
+    const windDir2 = payload[0]?.payload?._windDir2 as number | undefined;
 
     return (
       <div className={`rounded-lg border p-3 shadow-lg ${isDark ? 'border-gray-600 bg-gray-800 text-gray-100' : 'border-gray-200 bg-white text-gray-800'}`}>
@@ -113,13 +139,33 @@ export function WeatherChart({
         {val1 != null && (
           <div className="flex items-center gap-2 text-sm">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-blue-500" />
-            <span>{location1.locationName}: {val1}{unit}</span>
+            <span>
+              {location1.locationName}: {val1}{unit}
+              {metric === 'windSpeed' && windDir1 != null && (
+                <span className="ml-1.5 text-gray-500 dark:text-gray-400">
+                  <svg width="10" height="10" viewBox="0 0 10 10" className="mb-px inline-block" style={{ transform: `rotate(${windDir1}deg)` }}>
+                    <polygon points="5,1 8,8 2,8" fill="#3b82f6" />
+                  </svg>
+                  {' '}{t(`compass.${degreesToCardinalKey(windDir1)}`)} {Math.round(windDir1)}°
+                </span>
+              )}
+            </span>
           </div>
         )}
         {val2 != null && (
           <div className="flex items-center gap-2 text-sm">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500" />
-            <span>{location2.locationName}: {val2}{unit}</span>
+            <span>
+              {location2.locationName}: {val2}{unit}
+              {metric === 'windSpeed' && windDir2 != null && (
+                <span className="ml-1.5 text-gray-500 dark:text-gray-400">
+                  <svg width="10" height="10" viewBox="0 0 10 10" className="mb-px inline-block" style={{ transform: `rotate(${windDir2}deg)` }}>
+                    <polygon points="5,1 8,8 2,8" fill="#ef4444" />
+                  </svg>
+                  {' '}{t(`compass.${degreesToCardinalKey(windDir2)}`)} {Math.round(windDir2)}°
+                </span>
+              )}
+            </span>
           </div>
         )}
 
@@ -201,6 +247,11 @@ export function WeatherChart({
       [location2.locationName]: loc2Point ? loc2Point[metric] : null,
     };
 
+    if (metric === 'windSpeed') {
+      entry._windDir1 = point.windDirection ?? null;
+      entry._windDir2 = loc2Point?.windDirection ?? null;
+    }
+
     // Add historical data aligned by index (same calendar day, previous year)
     if (hist1Key && historicalLocation1 && index < historicalLocation1.length) {
       entry[hist1Key] = historicalLocation1[index][metric];
@@ -230,7 +281,9 @@ export function WeatherChart({
               dataKey={location1.locationName}
               stroke="#3b82f6"
               strokeWidth={2}
-              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 3 }}
+              dot={metric === 'windSpeed'
+                ? (props: any) => <WindDirectionDot key={`wd1-${props.index}`} {...props} color="#3b82f6" dirKey="_windDir1" />
+                : { fill: '#3b82f6', strokeWidth: 2, r: 3 }}
               activeDot={{ r: 5 }}
             />
             <Line
@@ -238,7 +291,9 @@ export function WeatherChart({
               dataKey={location2.locationName}
               stroke="#ef4444"
               strokeWidth={2}
-              dot={{ fill: '#ef4444', strokeWidth: 2, r: 3 }}
+              dot={metric === 'windSpeed'
+                ? (props: any) => <WindDirectionDot key={`wd2-${props.index}`} {...props} color="#ef4444" dirKey="_windDir2" />
+                : { fill: '#ef4444', strokeWidth: 2, r: 3 }}
               activeDot={{ r: 5 }}
             />
             {hist1Key && (
