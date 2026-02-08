@@ -94,7 +94,7 @@ function HomeContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 dark:from-gray-900 dark:to-slate-900">
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <header className="relative mb-8 text-center">
+        <header className="relative mb-8 pt-10 text-center sm:pt-0">
           <div className="absolute right-0 top-0 flex items-center gap-1">
             <UserGuide />
             <ThemeToggle />
