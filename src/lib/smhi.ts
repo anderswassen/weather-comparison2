@@ -21,6 +21,7 @@ export function parseWeatherData(data: SMHIResponse): WeatherDataPoint[] {
     const humidity = getParameterValue(timeSeries, 'r');
     const precipitation = getParameterValue(timeSeries, 'pmean');
     const windDirection = getParameterValue(timeSeries, 'wd');
+    const weatherSymbol = getParameterValue(timeSeries, 'Wsymb2');
 
     if (temperature !== null && windSpeed !== null && humidity !== null && precipitation !== null) {
       weatherPoints.push({
@@ -30,6 +31,7 @@ export function parseWeatherData(data: SMHIResponse): WeatherDataPoint[] {
         humidity,
         precipitation,
         windDirection: windDirection ?? undefined,
+        weatherSymbol: weatherSymbol ?? undefined,
       });
     }
   }
@@ -82,7 +84,10 @@ export function aggregateDailyData(hourlyData: WeatherDataPoint[]): WeatherDataP
   // Calculate daily averages
   const dailyData: WeatherDataPoint[] = [];
   for (const [dateKey, points] of dailyMap) {
-    const avgTemperature = points.reduce((sum, p) => sum + p.temperature, 0) / points.length;
+    const temps = points.map((p) => p.temperature);
+    const avgTemperature = temps.reduce((sum, t) => sum + t, 0) / temps.length;
+    const minTemperature = Math.min(...temps);
+    const maxTemperature = Math.max(...temps);
     const avgWindSpeed = points.reduce((sum, p) => sum + p.windSpeed, 0) / points.length;
     const avgHumidity = points.reduce((sum, p) => sum + p.humidity, 0) / points.length;
     const totalPrecipitation = points.reduce((sum, p) => sum + p.precipitation, 0);
@@ -90,13 +95,33 @@ export function aggregateDailyData(hourlyData: WeatherDataPoint[]): WeatherDataP
     const windDirValues = points.map((p) => p.windDirection).filter((d): d is number => d != null);
     const avgWindDirection = windDirValues.length > 0 ? circularMeanDegrees(windDirValues) : undefined;
 
+    // Pick the most common weather symbol (mode) for the day
+    const symbolValues = points.map((p) => p.weatherSymbol).filter((s): s is number => s != null);
+    let modeSymbol: number | undefined;
+    if (symbolValues.length > 0) {
+      const freq = new Map<number, number>();
+      for (const s of symbolValues) {
+        freq.set(s, (freq.get(s) ?? 0) + 1);
+      }
+      let maxCount = 0;
+      for (const [sym, count] of freq) {
+        if (count > maxCount) {
+          maxCount = count;
+          modeSymbol = sym;
+        }
+      }
+    }
+
     dailyData.push({
       date: new Date(dateKey),
       temperature: Math.round(avgTemperature * 10) / 10,
+      temperatureMin: Math.round(minTemperature * 10) / 10,
+      temperatureMax: Math.round(maxTemperature * 10) / 10,
       windSpeed: Math.round(avgWindSpeed * 10) / 10,
       humidity: Math.round(avgHumidity),
       precipitation: Math.round(totalPrecipitation * 10) / 10,
       windDirection: avgWindDirection,
+      weatherSymbol: modeSymbol,
     });
   }
 

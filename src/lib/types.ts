@@ -6,10 +6,13 @@ export interface Coordinates {
 export interface WeatherDataPoint {
   date: Date;
   temperature: number;
+  temperatureMin?: number;
+  temperatureMax?: number;
   windSpeed: number;
   humidity: number;
   precipitation: number;
   windDirection?: number;
+  weatherSymbol?: number;
 }
 
 export interface LocationWeather {
