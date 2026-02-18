@@ -9,6 +9,8 @@ import { ComparisonDashboard } from '@/components/ComparisonDashboard';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { UserGuide } from '@/components/UserGuide';
+import { UXAgentToggle } from '@/components/ux-agent/UXAgentToggle';
+import { UXAgentPanel } from '@/components/ux-agent/UXAgentPanel';
 import { useWeatherComparison } from '@/hooks/useWeatherComparison';
 import { useLanguage } from '@/context/LanguageContext';
 import { GeocodeResult } from '@/lib/types';
@@ -103,12 +105,14 @@ function HomeContent() {
 
   const canCompare = selectedLocation1 && selectedLocation2 && !isLoading;
   const showShareButton = location1 && location2 && !isLoading;
+  const showUXAgent = searchParams.get('ux-agent') === 'true';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 dark:from-gray-900 dark:to-slate-900">
       <div className="mx-auto max-w-6xl px-4 py-8">
         <header className="relative mb-8 pt-10 text-center sm:pt-0">
           <div className="absolute right-0 top-0 flex items-center gap-1">
+            {showUXAgent && <UXAgentToggle />}
             <UserGuide />
             <LanguageToggle />
             <ThemeToggle />
@@ -181,6 +185,8 @@ function HomeContent() {
             fetchHistorical={fetchHistorical}
           />
         )}
+
+        {showUXAgent && <UXAgentPanel />}
 
         <footer className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>
