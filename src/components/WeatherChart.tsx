@@ -1,8 +1,9 @@
 'use client';
 
 import {
-  LineChart,
+  ComposedChart,
   Line,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -130,6 +131,8 @@ export function WeatherChart({
     const val2 = loc2Entry?.value as number | undefined;
     const windDir1 = payload[0]?.payload?._windDir1 as number | undefined;
     const windDir2 = payload[0]?.payload?._windDir2 as number | undefined;
+    const tempRange1 = payload[0]?.payload?._range1 as [number, number] | undefined;
+    const tempRange2 = payload[0]?.payload?._range2 as [number, number] | undefined;
 
     return (
       <div className={`rounded-lg border p-3 shadow-lg ${isDark ? 'border-gray-600 bg-gray-800 text-gray-100' : 'border-gray-200 bg-white text-gray-800'}`}>
@@ -141,6 +144,11 @@ export function WeatherChart({
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-blue-500" />
             <span>
               {location1.locationName}: {val1}{unit}
+              {metric === 'temperature' && tempRange1 && (
+                <span className="ml-1 text-gray-500 dark:text-gray-400">
+                  ({t('tooltip.high')} {tempRange1[1]}{unit} / {t('tooltip.low')} {tempRange1[0]}{unit})
+                </span>
+              )}
               {metric === 'windSpeed' && windDir1 != null && (
                 <span className="ml-1.5 text-gray-500 dark:text-gray-400">
                   <svg width="10" height="10" viewBox="0 0 10 10" className="mb-px inline-block" style={{ transform: `rotate(${windDir1}deg)` }}>
@@ -157,6 +165,11 @@ export function WeatherChart({
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500" />
             <span>
               {location2.locationName}: {val2}{unit}
+              {metric === 'temperature' && tempRange2 && (
+                <span className="ml-1 text-gray-500 dark:text-gray-400">
+                  ({t('tooltip.high')} {tempRange2[1]}{unit} / {t('tooltip.low')} {tempRange2[0]}{unit})
+                </span>
+              )}
               {metric === 'windSpeed' && windDir2 != null && (
                 <span className="ml-1.5 text-gray-500 dark:text-gray-400">
                   <svg width="10" height="10" viewBox="0 0 10 10" className="mb-px inline-block" style={{ transform: `rotate(${windDir2}deg)` }}>
@@ -238,10 +251,15 @@ export function WeatherChart({
   const hist1Key = showHist1 ? `${location1.locationName} ${historicalYear}` : null;
   const hist2Key = showHist2 ? `${location2.locationName} ${historicalYear}` : null;
 
+  // Keys for temperature range bands
+  const range1Key = `_range1`;
+  const range2Key = `_range2`;
+
   // Combine data from both locations for the chart
   const chartData = location1.weatherData.map((point, index) => {
     const loc2Point = location2.weatherData[index];
-    const entry: Record<string, string | number | null> = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const entry: Record<string, any> = {
       date: format(point.date, 'MMM d'),
       [location1.locationName]: point[metric],
       [location2.locationName]: loc2Point ? loc2Point[metric] : null,
@@ -250,6 +268,16 @@ export function WeatherChart({
     if (metric === 'windSpeed') {
       entry._windDir1 = point.windDirection ?? null;
       entry._windDir2 = loc2Point?.windDirection ?? null;
+    }
+
+    // Add temperature range data for the band visualization
+    if (metric === 'temperature') {
+      if (point.temperatureMin != null && point.temperatureMax != null) {
+        entry[range1Key] = [point.temperatureMin, point.temperatureMax];
+      }
+      if (loc2Point?.temperatureMin != null && loc2Point?.temperatureMax != null) {
+        entry[range2Key] = [loc2Point.temperatureMin, loc2Point.temperatureMax];
+      }
     }
 
     // Add historical data aligned by index (same calendar day, previous year)
@@ -270,12 +298,37 @@ export function WeatherChart({
       </h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
             <XAxis dataKey="date" tick={{ fontSize: 12, fill: axisStroke }} stroke={axisStroke} />
             <YAxis tick={{ fontSize: 12, fill: axisStroke }} stroke={axisStroke} />
             <Tooltip content={CustomTooltip} />
             <Legend content={renderCustomLegend} />
+            {/* Temperature range bands (rendered first so they appear behind lines) */}
+            {metric === 'temperature' && (
+              <Area
+                type="monotone"
+                dataKey={range1Key}
+                fill="#3b82f6"
+                fillOpacity={0.12}
+                stroke="none"
+                legendType="none"
+                tooltipType="none"
+                isAnimationActive={false}
+              />
+            )}
+            {metric === 'temperature' && (
+              <Area
+                type="monotone"
+                dataKey={range2Key}
+                fill="#ef4444"
+                fillOpacity={0.12}
+                stroke="none"
+                legendType="none"
+                tooltipType="none"
+                isAnimationActive={false}
+              />
+            )}
             <Line
               type="monotone"
               dataKey={location1.locationName}
@@ -320,7 +373,7 @@ export function WeatherChart({
                 activeDot={{ r: 3 }}
               />
             )}
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>

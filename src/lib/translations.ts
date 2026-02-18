@@ -111,6 +111,8 @@ const en: TranslationMap = {
   'tooltip.more': 'more',
   'tooltip.less': 'less',
   'tooltip.thanYear': 'than {year}',
+  'tooltip.high': 'H',
+  'tooltip.low': 'L',
 
   // Insights
   'insights.title': 'Interesting Facts',
@@ -241,6 +243,8 @@ const sv: TranslationMap = {
   'tooltip.more': 'mer',
   'tooltip.less': 'mindre',
   'tooltip.thanYear': 'än {year}',
+  'tooltip.high': 'H',
+  'tooltip.low': 'L',
 
   // Insights
   'insights.title': 'Intressanta fakta',

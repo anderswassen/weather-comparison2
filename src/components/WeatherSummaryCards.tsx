@@ -11,12 +11,16 @@ interface WeatherSummaryCardsProps {
 function computeStats(location: LocationWeather) {
   const data = location.weatherData;
   const avgTemp = data.reduce((sum, d) => sum + d.temperature, 0) / data.length;
+  const highTemp = Math.max(...data.map((d) => d.temperatureMax ?? d.temperature));
+  const lowTemp = Math.min(...data.map((d) => d.temperatureMin ?? d.temperature));
   const maxWind = Math.max(...data.map((d) => d.windSpeed));
   const avgHumidity = data.reduce((sum, d) => sum + d.humidity, 0) / data.length;
   const totalPrecip = data.reduce((sum, d) => sum + d.precipitation, 0);
 
   return {
     avgTemp: Math.round(avgTemp * 10) / 10,
+    highTemp: Math.round(highTemp * 10) / 10,
+    lowTemp: Math.round(lowTemp * 10) / 10,
     maxWind: Math.round(maxWind * 10) / 10,
     avgHumidity: Math.round(avgHumidity),
     totalPrecip: Math.round(totalPrecip * 10) / 10,
@@ -77,6 +81,11 @@ export function WeatherSummaryCards({ location1, location2 }: WeatherSummaryCard
                   className={`text-sm text-gray-700 dark:text-gray-300 ${bold1 ? 'font-bold' : ''}`}
                 >
                   {val1} {card.unit}
+                  {card.key === 'avgTemp' && (
+                    <span className="ml-1 text-xs font-normal text-gray-400 dark:text-gray-500">
+                      {stats1.highTemp}↑ {stats1.lowTemp}↓
+                    </span>
+                  )}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -85,6 +94,11 @@ export function WeatherSummaryCards({ location1, location2 }: WeatherSummaryCard
                   className={`text-sm text-gray-700 dark:text-gray-300 ${bold2 ? 'font-bold' : ''}`}
                 >
                   {val2} {card.unit}
+                  {card.key === 'avgTemp' && (
+                    <span className="ml-1 text-xs font-normal text-gray-400 dark:text-gray-500">
+                      {stats2.highTemp}↑ {stats2.lowTemp}↓
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
