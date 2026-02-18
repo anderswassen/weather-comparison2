@@ -204,6 +204,7 @@ function HomeContent() {
             </a>
             .
           </p>
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">v1.0.0</p>
         </footer>
       </div>
     </div>
