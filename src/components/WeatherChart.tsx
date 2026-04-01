@@ -63,9 +63,12 @@ function renderCustomLegend(props: any) {
   }> | undefined;
   if (!payload) return null;
 
+  // Filter out internal range band entries
+  const visible = payload.filter((entry) => !entry.value.startsWith('_'));
+
   return (
     <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs">
-      {payload.map((entry) => {
+      {visible.map((entry) => {
         const isDashed = entry.payload?.strokeDasharray;
         const color = entry.payload?.stroke || entry.color || '#666';
         const opacity = entry.payload?.strokeOpacity ?? 1;
