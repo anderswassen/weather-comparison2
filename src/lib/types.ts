@@ -28,25 +28,27 @@ export interface GeocodeResult {
   coordinates: Coordinates;
 }
 
-export interface SMHITimeSeries {
-  validTime: string;
-  parameters: SMHIParameter[];
+export interface SMHITimeSeriesData {
+  air_temperature: number;
+  wind_speed: number;
+  relative_humidity: number;
+  precipitation_amount_mean: number;
+  wind_from_direction: number;
+  [key: string]: number;
 }
 
-export interface SMHIParameter {
-  name: string;
-  levelType: string;
-  level: number;
-  unit: string;
-  values: number[];
+export interface SMHITimeSeries {
+  time: string;
+  intervalParametersStartTime: string;
+  data: SMHITimeSeriesData;
 }
 
 export interface SMHIResponse {
-  approvedTime: string;
+  createdTime: string;
   referenceTime: string;
   geometry: {
     type: string;
-    coordinates: number[][];
+    coordinates: number[];
   };
   timeSeries: SMHITimeSeries[];
 }

@@ -1,29 +1,20 @@
-import { Coordinates, WeatherDataPoint, SMHIResponse, SMHITimeSeries } from './types';
-
-function getParameterValue(timeSeries: SMHITimeSeries, paramName: string): number | null {
-  const param = timeSeries.parameters.find((p) => p.name === paramName);
-  return param ? param.values[0] : null;
-}
+import { Coordinates, WeatherDataPoint, SMHIResponse } from './types';
 
 export function parseWeatherData(data: SMHIResponse): WeatherDataPoint[] {
   const weatherPoints: WeatherDataPoint[] = [];
 
   for (const timeSeries of data.timeSeries) {
-    const date = new Date(timeSeries.validTime);
+    const date = new Date(timeSeries.time);
+    const d = timeSeries.data;
 
-    // Get weather parameters
-    // t = temperature (Celsius)
-    // ws = wind speed (m/s)
-    // r = relative humidity (%)
-    // pmean = mean precipitation (mm/h)
-    const temperature = getParameterValue(timeSeries, 't');
-    const windSpeed = getParameterValue(timeSeries, 'ws');
-    const humidity = getParameterValue(timeSeries, 'r');
-    const precipitation = getParameterValue(timeSeries, 'pmean');
-    const windDirection = getParameterValue(timeSeries, 'wd');
-    const weatherSymbol = getParameterValue(timeSeries, 'Wsymb2');
+    const temperature = d.air_temperature;
+    const windSpeed = d.wind_speed;
+    const humidity = d.relative_humidity;
+    const precipitation = d.precipitation_amount_mean;
+    const windDirection = d.wind_from_direction;
+    const weatherSymbol = d.symbol_code;
 
-    if (temperature !== null && windSpeed !== null && humidity !== null && precipitation !== null) {
+    if (temperature != null && windSpeed != null && humidity != null && precipitation != null) {
       weatherPoints.push({
         date,
         temperature,

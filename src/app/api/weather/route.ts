@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid latitude or longitude' }, { status: 400 });
   }
 
-  // SMHI PMP3g API endpoint for point forecasts
-  const smhiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${lonNum}/lat/${latNum}/data.json`;
+  // SMHI SNOW1g API endpoint for point forecasts (replaced PMP3g v2 on 2026-03-31)
+  const smhiUrl = `https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/geotype/point/lon/${lonNum}/lat/${latNum}/data.json`;
 
   try {
     const response = await fetch(smhiUrl, {
