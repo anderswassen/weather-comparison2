@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Customized,
 } from 'recharts';
 import { format } from 'date-fns';
 import { LocationWeather, WeatherDataPoint } from '@/lib/types';
@@ -261,9 +262,11 @@ export function WeatherChart({
   // Combine data from both locations for the chart
   const chartData = location1.weatherData.map((point, index) => {
     const loc2Point = location2.weatherData[index];
+    const dayOfWeek = point.date.getDay();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const entry: Record<string, any> = {
       date: format(point.date, 'MMM d'),
+      _isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
       [location1.locationName]: point[metric],
       [location2.locationName]: loc2Point ? loc2Point[metric] : null,
     };
@@ -294,6 +297,47 @@ export function WeatherChart({
     return entry;
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const WeekendBands = (props: any) => {
+    const { xAxisMap, yAxisMap } = props;
+    if (!xAxisMap || !yAxisMap) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const xAxis = Object.values(xAxisMap)[0] as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const yAxis = Object.values(yAxisMap)[0] as any;
+    if (!xAxis?.scale || !yAxis) return null;
+
+    const top = yAxis.y;
+    const height = yAxis.height;
+    const positions = chartData.map((d) => xAxis.scale(d.date));
+    const step =
+      positions.length > 1 && Number.isFinite(positions[1] - positions[0])
+        ? Math.abs(positions[1] - positions[0])
+        : xAxis.width;
+
+    return (
+      <g>
+        {chartData.map((point, i) => {
+          if (!point._isWeekend) return null;
+          const cx = positions[i];
+          if (cx == null || Number.isNaN(cx)) return null;
+          return (
+            <rect
+              key={`weekend-${i}`}
+              x={cx - step / 2}
+              y={top}
+              width={step}
+              height={height}
+              fill={isDark ? '#cbd5e1' : '#64748b'}
+              fillOpacity={isDark ? 0.08 : 0.1}
+              pointerEvents="none"
+            />
+          );
+        })}
+      </g>
+    );
+  };
+
   return (
     <div className="rounded-xl bg-white p-4 shadow-md dark:bg-gray-800">
       <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -303,6 +347,7 @@ export function WeatherChart({
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+            <Customized component={WeekendBands} />
             <XAxis dataKey="date" tick={{ fontSize: 12, fill: axisStroke }} stroke={axisStroke} />
             <YAxis tick={{ fontSize: 12, fill: axisStroke }} stroke={axisStroke} />
             <Tooltip content={CustomTooltip} />
