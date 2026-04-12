@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Customized,
+  usePlotArea,
 } from 'recharts';
 import { format } from 'date-fns';
 import { LocationWeather, WeatherDataPoint } from '@/lib/types';
@@ -297,39 +297,32 @@ export function WeatherChart({
     return entry;
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const WeekendBands = (props: any) => {
-    const { xAxisMap, yAxisMap } = props;
-    if (!xAxisMap || !yAxisMap) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const xAxis = Object.values(xAxisMap)[0] as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const yAxis = Object.values(yAxisMap)[0] as any;
-    if (!xAxis?.scale || !yAxis) return null;
+  const WeekendBands = () => {
+    const plotArea = usePlotArea();
+    if (!plotArea || chartData.length === 0) return null;
 
-    const top = yAxis.y;
-    const height = yAxis.height;
-    const positions = chartData.map((d) => xAxis.scale(d.date));
-    const step =
-      positions.length > 1 && Number.isFinite(positions[1] - positions[0])
-        ? Math.abs(positions[1] - positions[0])
-        : xAxis.width;
+    const { x: plotX, y: plotY, width: plotWidth, height: plotHeight } = plotArea;
+    const n = chartData.length;
+    const step = n > 1 ? plotWidth / (n - 1) : plotWidth;
 
     return (
       <g>
         {chartData.map((point, i) => {
           if (!point._isWeekend) return null;
-          const cx = positions[i];
-          if (cx == null || Number.isNaN(cx)) return null;
+          const cx = n > 1 ? plotX + (i / (n - 1)) * plotWidth : plotX + plotWidth / 2;
+          const left = Math.max(plotX, cx - step / 2);
+          const right = Math.min(plotX + plotWidth, cx + step / 2);
+          const rectWidth = right - left;
+          if (rectWidth <= 0) return null;
           return (
             <rect
               key={`weekend-${i}`}
-              x={cx - step / 2}
-              y={top}
-              width={step}
-              height={height}
+              x={left}
+              y={plotY}
+              width={rectWidth}
+              height={plotHeight}
               fill={isDark ? '#cbd5e1' : '#64748b'}
-              fillOpacity={isDark ? 0.08 : 0.1}
+              fillOpacity={isDark ? 0.12 : 0.1}
               pointerEvents="none"
             />
           );
@@ -347,7 +340,7 @@ export function WeatherChart({
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-            <Customized component={WeekendBands} />
+            <WeekendBands />
             <XAxis dataKey="date" tick={{ fontSize: 12, fill: axisStroke }} stroke={axisStroke} />
             <YAxis tick={{ fontSize: 12, fill: axisStroke }} stroke={axisStroke} />
             <Tooltip content={CustomTooltip} />
